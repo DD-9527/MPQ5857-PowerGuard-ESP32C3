@@ -1,0 +1,67 @@
+dependencies:
+  adc:
+    dependencies: []
+    source:
+      path: F:\ESPIDF_Prj\MPQ5857\components\adc
+      type: local
+    version: '*'
+  board_io:
+    dependencies: []
+    source:
+      path: F:\ESPIDF_Prj\MPQ5857\components\board_io
+      type: local
+    version: '*'
+  espressif/cjson:
+    component_hash: 9372811fb197926f522c467627cf4a8e72b681e0366e17879631da801103aef3
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.7.19
+  idf:
+    source:
+      type: idf
+    version: 6.0.0
+  joltwallet/littlefs:
+    component_hash: 1808d73e99168f6f3c26dd31799a248484762b3a320ec4962dec11a145f4277f
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.20.3
+  mpq5857:
+    dependencies: []
+    source:
+      path: F:\ESPIDF_Prj\MPQ5857\components\mpq5857
+      type: local
+    version: '*'
+  myFS:
+    dependencies: []
+    source:
+      path: F:\ESPIDF_Prj\MPQ5857\components\myFS
+      type: local
+    version: '*'
+  web_server:
+    dependencies: []
+    source:
+      path: F:\ESPIDF_Prj\MPQ5857\components\web_server
+      type: local
+    version: '*'
+direct_dependencies:
+- adc
+- board_io
+- espressif/cjson
+- idf
+- joltwallet/littlefs
+- mpq5857
+- myFS
+- web_server
+manifest_hash: 9bf016e74d7448db532dc8d33abcf11e1d8ea7ce4076ee9b9b7da907df1641d7
+target: esp32c3
+version: 2.0.0

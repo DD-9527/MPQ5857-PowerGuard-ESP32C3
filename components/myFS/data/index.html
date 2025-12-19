@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MPQ5857电源管理芯片控制界面 - 实时监控和配置">
+    <meta name="keywords" content="MPQ5857,电源管理,实时监控,保护配置">
+    <meta name="author" content="dd_9527@foxmail.com">
+    <title>MPQ5857 电源管理控制台</title>
+    
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="fonts/SmileySans-Ob.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="style.css" as="style">
+    
+    <!-- 样式表 -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 降级处理：如果JavaScript不可用 -->
+    <noscript>
+        <style>
+            .no-js-message {
+                display: block !important;
+                padding: 20px;
+                background: #ff6b6b;
+                color: white;
+                text-align: center;
+                margin-bottom: 20px;
+                border-radius: 8px;
+            }
+            .requires-js {
+                display: none !important;
+            }
+        </style>
+    </noscript>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 无JavaScript提示 -->
+        <div class="no-js-message" style="display: none;">
+            此应用需要JavaScript才能正常工作，请在浏览器中启用JavaScript。
+        </div>
+        
+        <header>
+            <h1>MPQ5857 电源管理控制台</h1>
+        </header>
+        
+        <!-- 主要指标显示区域 -->
+        <main>
+            <section class="metrics-grid" aria-label="实时监测数据">
+                <div class="metric-card">
+                    <div class="metric-label">电压</div>
+                    <div class="metric-value" id="voltage" aria-live="polite">0.00</div>
+                    <div class="metric-unit">V</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">电流</div>
+                    <div class="metric-value" id="current" aria-live="polite">0.00</div>
+                    <div class="metric-unit">A</div>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-label">功率</div>
+                    <div class="metric-value" id="power" aria-live="polite">0.00</div>
+                    <div class="metric-unit">W</div>
+                </div>
+            </section>
+
+            <!-- 控制和状态区域 -->
+            <section class="status-control-row" aria-label="控制和状态">
+                <div class="control-section">
+                    <label class="power-switch">
+                        <input type="checkbox" id="powerSwitch" aria-label="电源输出开关">
+                        <span class="slider"></span>
+                    </label>
+                    <div class="switch-label">输出开关</div>
+                </div>
+
+                <div class="status-section">
+                    <h2 class="section-title">系统状态</h2>
+                    <div class="status-grid" role="list">
+                        <div class="status-item inactive" id="enable" role="listitem">
+                            <div class="status-icon" aria-hidden="true">🔌</div>
+                            <div class="status-text">输出</div>
+                        </div>
+                        
+                        <div class="status-item inactive" id="ocp" role="listitem">
+                            <div class="status-icon" aria-hidden="true">⚠️</div>
+                            <div class="status-text">过流</div>
+                        </div>
+                        
+                        <div class="status-item active" id="normal" role="listitem">
+                            <div class="status-icon" aria-hidden="true">✅</div>
+                            <div class="status-text">正常</div>
+                        </div>
+                        
+                        <div class="status-item inactive" id="ohp" role="listitem">
+                            <div class="status-icon" aria-hidden="true">🔥</div>
+                            <div class="status-text">过热</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 实时功率图表 -->
+            <section class="chart-container" aria-label="功率实时波形">
+                <h2 class="chart-title">功率实时波形</h2>
+                <div class="chart-wrapper">
+                    <canvas id="powerChart" role="img" aria-label="功率实时波形图表"></canvas>
+                </div>
+            </section>
+
+            <!-- 保护配置区域 -->
+            <section class="protection-section" aria-label="保护配置">
+                <h2 class="section-title">保护配置</h2>
+                
+                <!-- 配置管理 -->
+                <div class="ctrl-card" data-channel="0">
+                    <h3>配置管理</h3>
+                    <div class="btn-group">
+                        <button class="act-btn" data-act="0" aria-pressed="false">加载默认值</button>
+                        <button class="act-btn active" data-act="1" aria-pressed="true">保存为默认</button>
+                    </div>
+                </div>
+
+                <!-- 过流保护 -->
+                <div class="ctrl-card" data-channel="1">
+                    <h3>过流保护</h3>
+                    <label for="ocp-threshold">过流保护阈值</label>
+                    
+                    <div class="range-buttons" role="radiogroup" aria-labelledby="ocp-threshold">
+                        <button class="range-btn active" data-act="0" role="radio" aria-checked="true" aria-label="5A">5A</button>
+                        <button class="range-btn" data-act="1" role="radio" aria-checked="false" aria-label="10A">10A</button>
+                        <button class="range-btn" data-act="2" role="radio" aria-checked="false" aria-label="15A">15A</button>
+                        <button class="range-btn" data-act="3" role="radio" aria-checked="false" aria-label="20A">20A</button>
+                    </div>
+                    
+                    <label for="ocp-action">保护行为</label>
+                    <div class="btn-group" role="radiogroup" aria-labelledby="ocp-action">
+                        <button class="act-btn" data-act="0" role="radio" aria-checked="false" aria-pressed="false">立即断开</button>
+                        <button class="act-btn active" data-act="1" role="radio" aria-checked="true" aria-pressed="true">钳位断开</button>
+                    </div>
+                </div>
+
+                <!-- 欠压保护 -->
+                <div class="ctrl-card" data-channel="2">
+                    <h3>欠压保护</h3>
+                    <label for="uvp-threshold">欠压保护阈值</label>
+
+                    <div class="range-buttons" role="radiogroup" aria-labelledby="uvp-threshold">
+                        <button class="range-btn active" data-act="0" role="radio" aria-checked="true" aria-label="2V">2V</button>
+                        <button class="range-btn" data-act="1" role="radio" aria-checked="false" aria-label="4V">4V</button>
+                        <button class="range-btn" data-act="2" role="radio" aria-checked="false" aria-label="9V">9V</button>
+                    </div>
+
+                    <label for="uvp-action">保护行为</label>
+                    <div class="btn-group" role="radiogroup" aria-labelledby="uvp-action">
+                        <button class="act-btn" data-act="0" role="radio" aria-checked="false" aria-pressed="false">仅指示</button>
+                        <button class="act-btn active" data-act="1" role="radio" aria-checked="true" aria-pressed="true">立即断开</button>
+                        <button class="act-btn" data-act="2" role="radio" aria-checked="false" aria-pressed="false">去抖断开</button>
+                    </div>
+                </div>
+
+                <!-- 过压保护 -->
+                <div class="ctrl-card slider-card" data-channel="3">
+                    <h3>过压保护</h3>
+                    <label for="ovpSlider">过压保护阈值</label>
+                    <div class="slider-wrapper">
+                        <input type="range" class="range-slider" id="ovpSlider" min="0" max="13" value="13"
+                               aria-label="过压保护阈值滑块，范围0到13">
+                        <div class="slider-ticks" aria-hidden="true">
+                            <span class="slider-tick">16V</span>
+                            <span class="slider-tick">18V</span>
+                            <span class="slider-tick">20V</span>
+                            <span class="slider-tick">22V</span>
+                            <span class="slider-tick">24V</span>
+                            <span class="slider-tick">26V</span>
+                            <span class="slider-tick">28V</span>
+                            <span class="slider-tick">30V</span>
+                            <span class="slider-tick">32V</span>
+                            <span class="slider-tick">34V</span>
+                            <span class="slider-tick">36V</span>
+                            <span class="slider-tick">38V</span>
+                            <span class="slider-tick">40V</span>
+                            <span class="slider-tick">42V</span>
+                        </div>
+                    </div>
+                    <div class="slider-display" aria-live="polite">
+                        <span id="ovpCode">OVP = 42V</span> · <span id="ovpSlope">过压保护阈值</span>
+                    </div>
+
+                    <label for="ovp-action">保护行为</label>
+                    <div class="btn-group" role="radiogroup" aria-labelledby="ovp-action">
+                        <button class="act-btn" data-act="0" role="radio" aria-checked="false" aria-pressed="false">仅指示</button>
+                        <button class="act-btn active" data-act="1" role="radio" aria-checked="true" aria-pressed="true">立即断开</button>
+                        <button class="act-btn" data-act="2" role="radio" aria-checked="false" aria-pressed="false">去抖断开</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 高级设置 -->
+            <section class="advanced-section" aria-label="高级设置">
+                <h2 class="section-title">高级设置</h2>
+                
+                <!-- 消抖时间设置 -->
+                <div class="ctrl-card slider-card" data-channel="4">
+                    <h3>消抖时间设置（FLTTMR）</h3>
+                    <label for="flttmrSlider">消抖时间选择</label>
+                    <div class="slider-wrapper">
+                        <input type="range" class="range-slider" id="flttmrSlider" min="0" max="7" value="0"
+                               aria-label="消抖时间滑块，范围0到7">
+                        <div class="slider-ticks" aria-hidden="true">
+                            <span class="slider-tick">000</span>
+                            <span class="slider-tick">001</span>
+                            <span class="slider-tick">010</span>
+                            <span class="slider-tick">011</span>
+                            <span class="slider-tick">100</span>
+                            <span class="slider-tick">101</span>
+                            <span class="slider-tick">110</span>
+                            <span class="slider-tick">111</span>
+                        </div>
+                    </div>
+                    <div class="slider-display" aria-live="polite">
+                        <span id="flttmrCode">FLTTMR = 000</span> · <span id="flttmrSlope">0ms（默认）</span>
+                    </div>
+                </div>
+
+                <!-- 软启动斜率设置 -->
+                <div class="ctrl-card slider-card" data-channel="4">
+                    <h3>软启动斜率设置（SSSR）</h3>
+                    <label for="sssrSlider">软启动斜率选择</label>
+                    <div class="slider-wrapper">
+                        <input type="range" class="range-slider" id="sssrSlider" min="0" max="7" value="0"
+                               aria-label="软启动斜率滑块，范围0到7">
+                        <div class="slider-ticks" aria-hidden="true">
+                            <span class="slider-tick">000</span>
+                            <span class="slider-tick">001</span>
+                            <span class="slider-tick">010</span>
+                            <span class="slider-tick">011</span>
+                            <span class="slider-tick">100</span>
+                            <span class="slider-tick">101</span>
+                            <span class="slider-tick">110</span>
+                            <span class="slider-tick">111</span>
+                        </div>
+                    </div>
+                    <div class="slider-display" aria-live="polite">
+                        <span id="sssrCode">SSSR = 000</span> · <span id="sssrSlope">0.25V/ms（默认）</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 连接状态指示器 -->
+        <div class="connection-status" id="connectionStatus" role="status" aria-live="polite">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span class="status-text" id="statusText">连接中...</span>
+        </div>
+    </div>
+
+    <footer class="page-foot">
+        <p>MPQ5857 电源管理控制台 | 联系方式: dd_9527@foxmail.com</p>
+    </footer>
+
+
+
+    <!-- 错误提示容器 -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <!-- 脚本 -->
+    <script src="app.js"></script>
+    
+    <!-- Service Worker 注册（可选，用于离线支持） -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => console.log('SW registered: ', registration))
+                    .catch(registrationError => console.log('SW registration failed: ', registrationError));
+            });
+        }
+    </script>
+</body>
+</html>

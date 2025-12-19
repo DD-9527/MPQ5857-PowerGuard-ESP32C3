@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPQ5857 DEMO</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>MPQ5857 DEMO</h1>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">电压</div>
+                <div class="metric-value" id="voltage">0.00</div>
+                <div class="metric-unit">V</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">电流</div>
+                <div class="metric-value" id="current">0.00</div>
+                <div class="metric-unit">A</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-label">功率</div>
+                <div class="metric-value" id="power">0.00</div>
+                <div class="metric-unit">W</div>
+            </div>
+        </div>
+
+        <div class="status-control-row">
+            <div class="control-section">
+                <label class="power-switch">
+                    <input type="checkbox" id="powerSwitch">
+                    <span class="slider"></span>
+                </label>
+                <div class="switch-label">输出开关</div>
+            </div>
+
+            <div class="status-section">
+                <div class="status-grid">
+                    <div class="status-item inactive" id="enable">
+                        <div class="status-icon">🔌</div>
+                        <div class="status-text">输出</div>
+                    </div>
+                    
+                    <div class="status-item inactive" id="ocp">
+                        <div class="status-icon">⚠️</div>
+                        <div class="status-text">过流</div>
+                    </div>
+                    
+                    <div class="status-item active" id="normal">
+                        <div class="status-icon">✅</div>
+                        <div class="status-text">正常</div>
+                    </div>
+                    
+                    <div class="status-item inactive" id="ohp">
+                        <div class="status-icon">🔥</div>
+                        <div class="status-text">过热</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">功率实时波形</div>
+            <canvas id="powerChart"></canvas>
+        </div>
+
+        <div class="ctrl-card" data-channel="0"><!-- 这里的实现需要修改 -->
+            <div class="btn-group">
+                <button class="act-btn" data-act="0">加载默认值</button>
+                <button class="act-btn active" data-act="1">保存为默认</button>
+            </div>
+        </div>
+
+        <!-- ===== 过流保护 ===== -->
+        <div class="ctrl-card" data-channel="1">
+            <label>过流保护阈值</label>
+            
+            <div class="gear-buttons">
+                <button class="gear-btn active" data-act="0">5A</button>
+                <button class="gear-btn" data-act="1">10A</button>
+                <button class="gear-btn" data-act="2">15A</button>
+                <button class="gear-btn" data-act="3">20A</button>
+            </div>
+            
+            <label style="margin-top:12px;display:block;">保护行为</label>
+            <div class="btn-group">
+                <button class="act-btn" data-act="0">立即断开</button>
+                <button class="act-btn active" data-act="1">钳位断开</button>
+            </div>
+        </div>
+
+        <!-- ===== 欠压保护 ===== -->
+        <div class="ctrl-card" data-channel="2">
+            <label>欠压保护阈值</label>
+
+            <div class="gear-buttons">
+                <button class="gear-btn active" data-act="0">2V</button>
+                <button class="gear-btn" data-act="1">4V</button>
+                <button class="gear-btn" data-act="2">9V</button>
+            </div>
+
+            <label style="margin-top:12px;display:block;">保护行为</label>
+            <div class="btn-group">
+                <button class="act-btn" data-act="0">仅指示</button>
+                <button class="act-btn active" data-act="1">立即断开</button>
+                <button class="act-btn" data-act="2">去抖断开</button>
+            </div>
+        </div>
+
+        <!-- ===== 过压保护 ===== -->
+        <div class="ctrl-card-with-slide" data-channel="3">
+            <label>过压保护阈值: <span class="thrVal">42</span> V</label>
+            <input type="range" class="thrRange" min="16" max="42" step="4" value="42">
+
+            <label style="margin-top:12px;display:block;">保护行为</label>
+            <div class="btn-group">
+                <button class="act-btn" data-act="0">仅指示</button>
+                <button class="act-btn active" data-act="1">立即断开</button>
+                <button class="act-btn" data-act="2">去抖断开</button>
+            </div>
+        </div>
+
+        <!-- ===== 消抖时间设置（FLTTMR） ===== -->
+        <div class="ctrl-card flttmr-card" data-channel="4">
+            <label>消抖时间（FLTTMR）</label>
+            <div class="sssr-slider-wrapper">
+                <input type="range" class="sssr-slider" min="0" max="7" value="0" id="flttmrSlider">
+                <div class="sssr-ticks">
+                    <span class="sssr-tick">000</span>
+                    <span class="sssr-tick">001</span>
+                    <span class="sssr-tick">010</span>
+                    <span class="sssr-tick">011</span>
+                    <span class="sssr-tick">100</span>
+                    <span class="sssr-tick">101</span>
+                    <span class="sssr-tick">110</span>
+                    <span class="sssr-tick">111</span>
+                </div>
+            </div>
+            <div class="sssr-display">
+                <span id="flttmrCode">FLTTMR = 000</span> · <span id="flttmrSlope">2ms（默认）</span>
+            </div>
+        </div>
+
+
+        <!-- ===== 软启动斜率设置（SSSR） ===== -->
+        <div class="ctrl-card sssr-card" data-channel="4">
+            <label>软启动斜率（SSSR）</label>
+            <div class="sssr-slider-wrapper">
+                <input type="range" class="sssr-slider" min="0" max="7" value="0" id="sssrSlider">
+                <div class="sssr-ticks">
+                    <span class="sssr-tick">000</span>
+                    <span class="sssr-tick">001</span>
+                    <span class="sssr-tick">010</span>
+                    <span class="sssr-tick">011</span>
+                    <span class="sssr-tick">100</span>
+                    <span class="sssr-tick">101</span>
+                    <span class="sssr-tick">110</span>
+                    <span class="sssr-tick">111</span>
+                </div>
+            </div>
+            <div class="sssr-display">
+                <span id="sssrCode">SSSR = 000</span> · <span id="sssrSlope">0.25V/ms（默认）</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="page-foot">
+        dd_9527@foxmail.com
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
