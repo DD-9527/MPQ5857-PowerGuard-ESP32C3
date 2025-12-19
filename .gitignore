@@ -1,0 +1,29 @@
+# Build 目录
+build/
+cmake-build-*/
+.pio/
+
+# 编译输出
+*.o
+*.elf
+*.bin
+*.hex
+*.map
+*.dis
+
+# ESP-IDF 特定
+sdkconfig
+sdkconfig.old
+sdkconfig.defaults
+
+# IDE 文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 其他
+.DS_Store
+Thumbs.db
+doc/
