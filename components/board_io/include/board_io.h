@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+extern int flag;
 
 /**
  * @brief Configure all GPIO pins for the board

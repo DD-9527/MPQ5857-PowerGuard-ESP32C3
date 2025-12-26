@@ -9,6 +9,8 @@
 #include "adc.h"
 #include "mpq5857.h"
 
+extern int flag;
+
 static const char *TAG = "http_server";
 
 static httpd_handle_t ws_server = NULL;
@@ -52,19 +54,19 @@ static void IRAM_ATTR ws_push_timer_cb(void *arg)
 
 
     /* Enhanced JSON with more data points and device status */
-    int output_enabled = 1; // mock value
+    
     int ocp = 0, uvp = 0, ovp = 0, otp = 0; // mock values
     int normal = 1; // mock values
  
     uint8_t fault = gpio_get_level(2);
-    if(!fault){
+    if(flag){
+        flag = 0;
         ESP_LOGI(TAG, "FAULT!!!");
         uint8_t temp;
         mpq5857_read_regs(6, &temp, 1);
-        //gpio_set_level(8, 0);
+        gpio_set_level(8, 0);
         ESP_LOGI(TAG, "%x", temp);
         mpq5857_write_reg(6, 0xFF);
-        output_enabled = 0;
         // if(temp & 0x0100){
         //     otp = 1;
         //     ESP_LOGI(TAG, "otp");
@@ -83,7 +85,7 @@ static void IRAM_ATTR ws_push_timer_cb(void *arg)
         }
     }
 
-
+    int output_enabled = gpio_get_level(8);
     // ESP_LOGI(TAG, "WebSocket状态数据 - output_enabled:%d, ocp:%d, uvp:%d, ovp:%d, otp:%d, normal:%d, fault:%d",
     //          output_enabled, ocp, uvp, ovp, otp, normal, fault);
     
@@ -94,9 +96,8 @@ static void IRAM_ATTR ws_push_timer_cb(void *arg)
          "\"voltage\":%.2f,"
          "\"current\":%.2f,"
          "\"power\":%.2f,"
-         "\"output_enabled\":%d,"
          "\"status\":{"
-         "\"ocp\":%d,\"uvp\":%d,\"ovp\":%d,\"otp\":%d,"
+         "\"output_enabled\":%d,\"ocp\":%d,\"uvp\":%d,\"ovp\":%d,\"otp\":%d,"
          "\"normal\":%d,\"fault\":%d"
          "}}",
          esp_timer_get_time() / 1000, // 毫秒时间戳

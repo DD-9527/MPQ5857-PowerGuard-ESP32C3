@@ -6,6 +6,8 @@
 #include "esp_log.h"
 #include "esp_err.h"
 
+int flag;
+
 static const char *TAG = "board_io";
 
 /* GPIO pin masks for different pin groups */
@@ -22,14 +24,11 @@ static const char *TAG = "board_io";
 #define DEFAULT_EN2_LEVEL   0
 #define DEFAULT_BUZZER_LEVEL 0
 
-// 中断处理函数（必须是静态的，且签名固定）
+// 中断处理函数
 static void IRAM_ATTR gpio_isr_handler(void* arg) {
     //uint32_t gpio_num = (uint32_t)arg;
     // 这里处理中断逻辑，例如记录事件或发送信号
-    // 示例：打印日志（实际项目中用队列传递数据给主任务）
-    //ESP_LOGI(TAG, "Interrupt triggered on GPIO %d", gpio_num);
-    gpio_set_level(8, 0);
-    // 如果需要去抖动，可以用定时器或简单延时（但别用vTaskDelay，因为它在中断上下文中）
+    flag = 1;
     // 实际中，最好用xQueueSendFromISR发送到主任务处理
 }
 

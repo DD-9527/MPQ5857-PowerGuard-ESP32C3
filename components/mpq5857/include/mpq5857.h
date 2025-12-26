@@ -5,7 +5,7 @@
 #include "esp_err.h"
 
 #define MPQ5857_DEV_ADDR        0x30
-#define MPQ5857_I2C_FREQ_HZ     100000
+#define MPQ5857_I2C_FREQ_HZ     400000
 #define MPQ5857_TIMEOUT_MS      100
 
 // ========== 寄存器地址定义 ==========

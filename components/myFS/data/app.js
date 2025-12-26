@@ -788,7 +788,7 @@ class UIManager {
     }
 
     updateStatus(status) {
-        //console.log('updateStatus接收到的状态数据:', JSON.stringify(status, null, 2));
+        console.log('updateStatus接收到的状态数据:', JSON.stringify(status, null, 2));
         
         // 处理所有状态字段，包括字段名映射
         if (status.normal !== undefined) {
@@ -802,6 +802,11 @@ class UIManager {
         if (status.output_enabled !== undefined) {
             console.log(`更新enable状态: ${status.output_enabled}`);
             this.setStatus('enable', status.output_enabled);
+
+            const powerSwitch = document.getElementById('powerSwitch');
+            if (powerSwitch) {
+                powerSwitch.checked = status.output_enabled;
+            }
         }
         
         // 修复1：处理OTP/OHP字段名不匹配问题
@@ -825,7 +830,7 @@ class UIManager {
         }
         
         // 检查未处理的字段
-        const expectedFields = ['normal', 'ocp', /*'output_enabled',*/ 'otp', 'uvp', 'ovp', 'fault'];
+        const expectedFields = ['normal', 'ocp', 'output_enabled', 'otp', 'uvp', 'ovp', 'fault'];
         const receivedFields = Object.keys(status);
         const missingFields = expectedFields.filter(field => !receivedFields.includes(field));
         const extraFields = receivedFields.filter(field => !expectedFields.includes(field));
