@@ -799,10 +799,10 @@ class UIManager {
             //console.log(`更新ocp状态: ${status.ocp}`);
             this.setStatus('ocp', status.ocp);
         }
-        // if (status.output_enabled !== undefined) {
-        //     console.log(`更新enable状态: ${status.output_enabled}`);
-        //     this.setStatus('enable', status.output_enabled);
-        // }
+        if (status.output_enabled !== undefined) {
+            console.log(`更新enable状态: ${status.output_enabled}`);
+            this.setStatus('enable', status.output_enabled);
+        }
         
         // 修复1：处理OTP/OHP字段名不匹配问题
         if (status.otp !== undefined) {

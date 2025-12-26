@@ -50,21 +50,40 @@ static void IRAM_ATTR ws_push_timer_cb(void *arg)
     value = adc_read_once();//与adc耦合，需要解耦
     float power = value.voltage * value.current;
 
-    uint8_t fault = gpio_get_level(2);
-    if(!fault){
-        ESP_LOGI(TAG, "FAULT!!!");
-        //gpio_set_level(8, 0);
-        uint8_t temp;
-        mpq5857_read_regs(6, &temp, 1);
-        ESP_LOGI(TAG, "%x", temp);
-        mpq5857_write_reg(6, 0xFF);
-    }
 
     /* Enhanced JSON with more data points and device status */
     int output_enabled = 1; // mock value
     int ocp = 0, uvp = 0, ovp = 0, otp = 0; // mock values
     int normal = 1; // mock values
-    
+ 
+    uint8_t fault = gpio_get_level(2);
+    if(!fault){
+        ESP_LOGI(TAG, "FAULT!!!");
+        uint8_t temp;
+        mpq5857_read_regs(6, &temp, 1);
+        //gpio_set_level(8, 0);
+        ESP_LOGI(TAG, "%x", temp);
+        mpq5857_write_reg(6, 0xFF);
+        output_enabled = 0;
+        // if(temp & 0x0100){
+        //     otp = 1;
+        //     ESP_LOGI(TAG, "otp");
+        // }
+        if(temp & 0x20){
+            ocp = 1;
+            ESP_LOGI(TAG, "ocp");
+        }
+        if(temp & 0x10){
+            ovp = 1;
+            ESP_LOGI(TAG, "ovp");
+        }
+        if(temp & 0x08){
+            uvp = 1;
+            ESP_LOGI(TAG, "uvp");
+        }
+    }
+
+
     // ESP_LOGI(TAG, "WebSocket状态数据 - output_enabled:%d, ocp:%d, uvp:%d, ovp:%d, otp:%d, normal:%d, fault:%d",
     //          output_enabled, ocp, uvp, ovp, otp, normal, fault);
     
